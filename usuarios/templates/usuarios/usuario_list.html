@@ -1,0 +1,177 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Lista de Usuarios - Gestión de Usuarios{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">
+        <i class="fas fa-users text-primary"></i> 
+        Lista de Usuarios
+    </h1>
+    <div>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="fas fa-plus"></i> Agregar Usuario
+        </button>
+        <a href="/usuarios/crear/" class="btn btn-outline-info">
+            <i class="fas fa-code"></i> Ver API
+        </a>
+    </div>
+</div>
+
+{% if usuarios %}
+    <div class="row">
+        {% for usuario in usuarios %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card user-card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <i class="fas fa-user text-primary"></i> 
+                        {{ usuario.nombre }} {{ usuario.apellido }}
+                    </h5>
+                    <p class="card-text text-muted">
+                        <i class="fas fa-id-card me-2"></i> Cédula: {{ usuario.cedula }}
+                    </p>
+                    <p class="card-text text-muted">
+                        <i class="fas fa-envelope me-2"></i> Email: {{ usuario.email }}
+                    </p>
+                    <div class="mt-auto">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-outline-primary" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#editUserModal"
+                                    data-id="{{ usuario.id }}"
+                                    data-nombre="{{ usuario.nombre }}"
+                                    data-apellido="{{ usuario.apellido }}"
+                                    data-cedula="{{ usuario.cedula }}"
+                                    data-email="{{ usuario.email }}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <a href="{% url 'usuario-delete-html' usuario.id %}" 
+                               class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-user-times fa-5x text-muted mb-3"></i>
+        <h3 class="text-muted">No hay usuarios registrados</h3>
+        <p class="text-muted">Comienza agregando tu primer usuario</p>
+        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="fas fa-plus"></i> Agregar Primer Usuario
+        </button>
+    </div>
+{% endif %}
+
+<!-- Modal para Agregar Usuario -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus text-success"></i> Agregar Nuevo Usuario
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addUserForm">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="apellido" class="form-label">Apellido *</label>
+                        <input type="text" class="form-control" id="apellido" name="apellido" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cedula" class="form-label">Cédula *</label>
+                        <input type="text" class="form-control" id="cedula" name="cedula" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Agregar Usuario
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Editar Usuario -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit text-primary"></i> Editar Usuario
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editUserForm">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit-id" name="id">
+                    <div class="mb-3">
+                        <label for="edit-nombre" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="edit-nombre" name="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-apellido" class="form-label">Apellido *</label>
+                        <input type="text" class="form-control" id="edit-apellido" name="apellido" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-cedula" class="form-label">Cédula *</label>
+                        <input type="text" class="form-control" id="edit-cedula" name="cedula" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-email" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="edit-email" name="email" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Actualizar Usuario
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar modal de edición
+    const editModal = document.getElementById('editUserModal');
+    editModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const userId = button.getAttribute('data-id');
+        const userName = button.getAttribute('data-nombre');
+        const userApellido = button.getAttribute('data-apellido');
+        const userCedula = button.getAttribute('data-cedula');
+        const userEmail = button.getAttribute('data-email');
+        
+        document.getElementById('edit-id').value = userId;
+        document.getElementById('edit-nombre').value = userName;
+        document.getElementById('edit-apellido').value = userApellido;
+        document.getElementById('edit-cedula').value = userCedula;
+        document.getElementById('edit-email').value = userEmail;
+    });
+});
+</script>
+{% endblock %}

@@ -36,10 +36,20 @@ class ProductoDeleteView(DeleteView):
     model = Producto
     template_name = 'productos/producto_confirm_delete.html'
     success_url = reverse_lazy ('producto-list-html')
-    context_object_name = 'producto'
+    context_object_name = 'producto' 
 
+    def form_valid(self, form):
+        """Método moderno para lógico personalizado al eliminacion."""
+        producto = self.get_object()
+        print("-------------------------------------------------------")
+        print(f"DELETE request received - Eliminando producto: {producto.nombre}    (ID: {producto.id})")
+        messages.success(self.request, f'El producto {producto.nombre} ha sido eliminado exitosamente.')
+        return super().form_valid(form)
+    
     def delete(self, request, *args, **kwargs):
-        producto = self
+        producto = self.get_object()
+        print("-------------------------------------------------------")
+        print(f'DELETE request received - Eliminando producto: {producto.nombre}    (ID: {producto.id})')
         messages.success(request, f'El producto {producto.nombre} ha sido eliminado exitosamente.')
         return super().delete(request, *args, **kwargs)
     
@@ -49,10 +59,14 @@ class ProductoAjaxView(generics.GenericAPIView):
     serializer_class = ProductoSerializer
 
     def post(self, request, *args, **kwargs):
-
+        """( Crear un nuevo producto via AJAX)"""
+        print("-------------------------------------------------------")
+        print("POST request received")
+        print(request.body)
         try:
             data = {
                 'nombre': request.POST.get('nombre'),
+                #'apellido': request.POST.get('apellido'),
                 'descripcion': request.POST.get('descripcion', ''),
                 'precio': request.POST.get('precio')
             }
@@ -61,6 +75,7 @@ class ProductoAjaxView(generics.GenericAPIView):
             return JsonResponse({
                 'id': producto.id,
                 'nombre': producto.nombre,
+                #'apellido': producto.apellido,
                 'descripcion': producto.descripcion,
                 'precio': str(producto.precio),
                 #'creado': producto.creado.strftime('%Y-%m-%d %H:%M:%S') 
@@ -75,6 +90,7 @@ class ProductoAjaxView(generics.GenericAPIView):
             data = json.loads(request.body)
 
             producto.nombre = data.get('nombre', producto.nombre)
+            #producto.apellido = data.get('apellido', producto.apellido)
             producto.descripcion = data.get('descripcion', producto.descripcion)
             producto.precio = data.get('precio', producto.precio)
             producto.save()
@@ -82,6 +98,7 @@ class ProductoAjaxView(generics.GenericAPIView):
             return JsonResponse({
                 'id': producto.id,
                 'nombre': producto.nombre,
+                #'apellido': producto.apellido,
                 'descripcion': producto.descripcion,
                 'precio': str(producto.precio),
                 'creado': producto.creado.strftime('%Y-%m-%d %H:%M:%S') 
