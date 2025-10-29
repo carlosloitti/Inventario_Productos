@@ -15,7 +15,7 @@ from rest_framework import viewsets
 class ProductoListAPIView(generics.ListAPIView):
     queryset = Producto.objects.all()
     serializer_class = ProductoSerializer
-    
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
@@ -32,10 +32,64 @@ class ProductoListAPIView(generics.ListAPIView):
                 'detalles': str(e)
             }, status=500)
 
+class ProductoDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Producto.objects.all()
+    serializer_class = ProductoSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return JsonResponse(serializer.data, status=200)
+        except Exception as e:
+            return JsonResponse({
+                'error': 'Producto no encontrado',
+                'detalles': str(e)
+            }, status=404)
+        
+    def update(self, request, *args, **kwargs):
+        try:
+            partial = kwargs.pop('partial', False)
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            if not serializer.is_valid():
+                return JsonResponse({
+                    'error': 'Datos inválidos',
+                    'detalles': serializer.errors
+                }, status=400)
+            self.perform_update(serializer)
+            return JsonResponse(serializer.data, status=200)
+        except Producto.DoesNotExist:
+            return JsonResponse({
+                'error': 'Producto no encontrado'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'error': 'Error interno del servidor',
+                'detalles': str(e)
+            }, status=500)
+    
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return JsonResponse({'detalle': 'Producto eliminado exitosamente'}, status=204)
+        except Producto.DoesNotExist:
+            return JsonResponse({
+                'error': 'Producto no encontrado'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'error': 'Error interno del servidor',
+                'detalles': str(e)
+            }, status=500)
+
 # Eliminar Producto
 class ProductoDeleteAPIView(generics.DestroyAPIView):
     queryset = Producto.objects.all()
     serializer_class = ProductoSerializer
+
+    
 
 # Create your views here.
 class ProductoListView(ListView):
