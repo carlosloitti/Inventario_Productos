@@ -15,6 +15,22 @@ from rest_framework import viewsets
 class ProductoListAPIView(generics.ListAPIView):
     queryset = Producto.objects.all()
     serializer_class = ProductoSerializer
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return JsonResponse({
+                'error': 'Datos inválidos',
+                'detalles': serializer.errors
+            }, status=400)
+        try:
+            self.perform_create(serializer)
+            return JsonResponse(serializer.data, status=201)
+        except Exception as e:
+            return JsonResponse({
+                'error': 'Error interno del servidor',
+                'detalles': str(e)
+            }, status=500)
 
 # Eliminar Producto
 class ProductoDeleteAPIView(generics.DestroyAPIView):
@@ -52,7 +68,10 @@ class ProductoDeleteView(DeleteView):
         print(f'DELETE request received - Eliminando producto: {producto.nombre}    (ID: {producto.id})')
         messages.success(request, f'El producto {producto.nombre} ha sido eliminado exitosamente.')
         return super().delete(request, *args, **kwargs)
-    
+
+
+  
+
 @method_decorator(csrf_exempt, name='dispatch')
 class ProductoAjaxView(generics.GenericAPIView):
     queryset = Producto.objects.all()
