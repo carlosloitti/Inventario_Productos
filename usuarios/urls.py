@@ -1,12 +1,13 @@
 from django.urls import path, include
 from .views import (
-    UsuarioDeleteAPIView, UsuarioListAPIView,
+    UsuarioDeleteAPIView, UsuarioDetailAPIView, UsuarioListAPIView,
     UsuarioListView, UsuarioDeleteView, DemoView, UsuarioAjaxView,
     UsuarioCreateView
 )
 
 urlpatterns = [
     path('api/usuarios/', UsuarioListAPIView.as_view(), name='usuario-list-api'),
+    path('api/usuarios/<int:pk>/', UsuarioDetailAPIView.as_view(), name='usuario-detail-api'),
     path('api/usuarios/<int:pk>/delete/', UsuarioDeleteAPIView.as_view(), name='usuario-delete-api'),
 
     path('ajax/usuarios/', UsuarioAjaxView.as_view(), name='usuario-ajax'),

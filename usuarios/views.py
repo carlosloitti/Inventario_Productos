@@ -18,6 +18,80 @@ class UsuarioListAPIView(generics.ListAPIView):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
 
+    queryset = Usuario.objects.all()
+    serializer_class = UsuarioSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return JsonResponse({
+                'error': 'Datos inválidos',
+                'detalles': serializer.errors
+            }, status=400)
+        try:
+            self.perform_create(serializer)
+            return JsonResponse(serializer.data, status=201)
+        except Exception as e:
+            return JsonResponse({
+                'error': 'Error interno del servidor',
+                'detalles': str(e)
+            }, status=500)
+        
+
+
+class UsuarioDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Usuario.objects.all()
+    serializer_class = UsuarioSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return JsonResponse(serializer.data, status=200)
+        except Exception as e:
+            return JsonResponse({
+                'error': 'Usuario no encontrado',
+                'detalles': str(e)
+            }, status=404)
+        
+    def update(self, request, *args, **kwargs):
+        try:
+            partial = kwargs.pop('partial', False)
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            if not serializer.is_valid():
+                return JsonResponse({
+                    'error': 'Datos inválidos',
+                    'detalles': serializer.errors
+                }, status=400)
+            self.perform_update(serializer)
+            return JsonResponse(serializer.data, status=200)
+        except Usuario.DoesNotExist:
+            return JsonResponse({
+                'error': 'Usuario no encontrado'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'error': 'Error interno del servidor',
+                'detalles': str(e)
+            }, status=500)
+    
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return JsonResponse({'detalle': 'Usuario eliminado exitosamente'}, status=204)
+        except Usuario.DoesNotExist:
+            return JsonResponse({
+                'error': 'Usuario no encontrado'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'error': 'Error interno del servidor',
+                'detalles': str(e)
+            }, status=500)
+
+
 # Eliminar Usuario
 class UsuarioDeleteAPIView(generics.DestroyAPIView):
     queryset = Usuario.objects.all()
